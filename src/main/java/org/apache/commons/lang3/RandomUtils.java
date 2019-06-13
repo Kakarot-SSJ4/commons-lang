@@ -69,6 +69,7 @@ public class RandomUtils {
      * @return the random byte array
      * @throws IllegalArgumentException if {@code count} is negative
      */
+    @SuppressWarnings("index:array.length.negative") // Validate.isTrue => count >= 0
     public static byte[] nextBytes(final int count) {
         Validate.isTrue(count >= 0, "Count cannot be negative.");
 
@@ -91,6 +92,7 @@ public class RandomUtils {
      *             {@code startInclusive} is negative
      * @return the random integer
      */
+    @SuppressWarnings("index:argument.type.incompatible") // #1: Validate.isTrue ensures endExclusive >= startInclusive and both are non negative as well
     public static int nextInt(final int startInclusive, final int endExclusive) {
         Validate.isTrue(endExclusive >= startInclusive,
                 "Start value must be smaller or equal to end value.");
@@ -100,7 +102,7 @@ public class RandomUtils {
             return startInclusive;
         }
 
-        return startInclusive + RANDOM.nextInt(endExclusive - startInclusive);
+        return startInclusive + RANDOM.nextInt(endExclusive - startInclusive); // #1
     }
 
     /**
