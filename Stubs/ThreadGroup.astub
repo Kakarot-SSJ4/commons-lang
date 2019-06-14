@@ -1,0 +1,31 @@
+import org.checkerframework.checker.index.qual.NonNegative;
+package java.lang;
+
+class ThreadGroup implements UncaughtExceptionHandler {
+    ThreadGroup(String arg0);
+    ThreadGroup(ThreadGroup arg0, String arg1);
+    String getName();
+    ThreadGroup getParent();
+    int getMaxPriority();
+    boolean isDaemon();
+    boolean isDestroyed();
+    void setDaemon(boolean arg0);
+    void setMaxPriority(int arg0);
+    boolean parentOf(ThreadGroup arg0);
+    void checkAccess();
+    @NonNegative int activeCount();
+    @NonNegative int enumerate(Thread[] arg0);
+    @NonNegative int enumerate(Thread[] arg0, boolean arg1);
+    @NonNegative int activeGroupCount();
+    @NonNegative int enumerate(ThreadGroup[] arg0);
+    @NonNegative int enumerate(ThreadGroup[] arg0, boolean arg1);
+    void stop();
+    void interrupt();
+    void suspend();
+    void resume();
+    void destroy();
+    void list();
+    void uncaughtException(Thread arg0, Throwable arg1);
+    boolean allowThreadSuspension(boolean arg0);
+    String toString();
+}
