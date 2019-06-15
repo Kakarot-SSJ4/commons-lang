@@ -207,6 +207,10 @@ public class ClassUtils {
      * @param className  the className to get the short name for
      * @return the class name of the class without the package name or an empty string
      */
+    @SuppressWarnings("index:argument.type.incompatible") /*
+    #1: className.startsWith("[") => @MinLen(1)
+    #2: className = className.substring(1) followed by arrayPrefix.append("[]") ensures @MinLen(2)
+    */
     public static String getShortClassName(String className) {
         if (StringUtils.isEmpty(className)) {
             return StringUtils.EMPTY;
@@ -216,13 +220,13 @@ public class ClassUtils {
 
         // Handle array encoding
         if (className.startsWith("[")) {
-            while (className.charAt(0) == '[') {
-                className = className.substring(1);
+            while (className.charAt(0) == '[') { // #1
+                className = className.substring(1); // #1
                 arrayPrefix.append("[]");
             }
             // Strip Object type encoding
-            if (className.charAt(0) == 'L' && className.charAt(className.length() - 1) == ';') {
-                className = className.substring(1, className.length() - 1);
+            if (className.charAt(0) == 'L' && className.charAt(className.length() - 1) == ';') { // #2
+                className = className.substring(1, className.length() - 1); // #2
             }
 
             if (reverseAbbreviationMap.containsKey(className)) {

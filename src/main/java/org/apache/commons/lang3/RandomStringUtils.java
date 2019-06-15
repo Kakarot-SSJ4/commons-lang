@@ -18,6 +18,10 @@ package org.apache.commons.lang3;
 
 import java.util.Random;
 
+import org.checkerframework.checker.index.qual.IndexFor;
+import org.checkerframework.checker.index.qual.IndexOrHigh;
+import org.checkerframework.checker.index.qual.NonNegative;
+
 /**
  * <p>Operations for random {@code String}s.</p>
  * <p>Currently <em>private high surrogate</em> characters are ignored.
@@ -284,7 +288,8 @@ public class RandomStringUtils {
      *  numeric characters
      * @return the random string
      */
-    public static String random(final int count, final int start, final int end, final boolean letters, final boolean numbers) {
+    @SuppressWarnings("index:argument.type.incompatible") // null array is handled differently
+    public static String random(final int count, final @NonNegative int start, final @NonNegative int end, final boolean letters, final boolean numbers) {
         return random(count, start, end, letters, numbers, null, RANDOM);
     }
 
@@ -308,7 +313,7 @@ public class RandomStringUtils {
      * @throws ArrayIndexOutOfBoundsException if there are not
      *  {@code (end - start) + 1} characters in the set array.
      */
-    public static String random(final int count, final int start, final int end, final boolean letters, final boolean numbers, final char... chars) {
+    public static String random(final int count, final @IndexFor("#6") int start, final @IndexOrHigh("#6") int end, final boolean letters, final boolean numbers, final char... chars) {
         return random(count, start, end, letters, numbers, chars, RANDOM);
     }
 
@@ -345,7 +350,12 @@ public class RandomStringUtils {
      * @throws IllegalArgumentException if {@code count} &lt; 0 or the provided chars array is empty.
      * @since 2.0
      */
-    public static String random(int count, int start, int end, final boolean letters, final boolean numbers,
+    @SuppressWarnings({"index:argument.type.incompatible","index:array.access.unsafe.high","index:assignment.type.incompatible"}) /*
+    #1: end > start is ensured by previous if statements
+    #2: random.nextInt(gap) returns an integer less than gap, hence random.nextInt(gap) + start < end
+    #3: if char is null, all possible characters are used, and their codepoints are used instead of index.
+    */
+    public static String random(int count, @IndexFor("#6") int start, @IndexOrHigh("#6") int end, final boolean letters, final boolean numbers,
                                 final char[] chars, final Random random) {
         if (count == 0) {
             return StringUtils.EMPTY;
@@ -361,10 +371,10 @@ public class RandomStringUtils {
                 end = chars.length;
             } else {
                 if (!letters && !numbers) {
-                    end = Character.MAX_CODE_POINT;
+                    end = Character.MAX_CODE_POINT; // #3
                 } else {
-                    end = 'z' + 1;
-                    start = ' ';
+                    end = 'z' + 1; // #3
+                    start = ' '; // #3
                 }
             }
         } else {
@@ -388,7 +398,7 @@ public class RandomStringUtils {
         while (count-- != 0) {
             int codePoint;
             if (chars == null) {
-                codePoint = random.nextInt(gap) + start;
+                codePoint = random.nextInt(gap) + start; // #1
 
                 switch (Character.getType(codePoint)) {
                 case Character.UNASSIGNED:
@@ -399,7 +409,7 @@ public class RandomStringUtils {
                 }
 
             } else {
-                codePoint = chars[random.nextInt(gap) + start];
+                codePoint = chars[random.nextInt(gap) + start]; // #2
             }
 
             final int numberOfChars = Character.charCount(codePoint);
@@ -439,6 +449,7 @@ public class RandomStringUtils {
      * @return the random string
      * @throws IllegalArgumentException if {@code count} &lt; 0 or the string is empty.
      */
+    @SuppressWarnings("index:argument.type.incompatible") // null array is handled differently
     public static String random(final int count, final String chars) {
         if (chars == null) {
             return random(count, 0, 0, false, false, null, RANDOM);
@@ -458,11 +469,15 @@ public class RandomStringUtils {
      * @return the random string
      * @throws IllegalArgumentException if {@code count} &lt; 0.
      */
+    @SuppressWarnings("index:argument.type.incompatible") /*
+    #1: null array is handled differently
+    #2: if chars.length == 0 and chars != null, an IllegalArgumentException is thrown
+    */
     public static String random(final int count, final char... chars) {
         if (chars == null) {
-            return random(count, 0, 0, false, false, null, RANDOM);
+            return random(count, 0, 0, false, false, null, RANDOM); // #1
         }
-        return random(count, 0, chars.length, false, false, chars, RANDOM);
+        return random(count, 0, chars.length, false, false, chars, RANDOM); //#2
     }
 
 }
