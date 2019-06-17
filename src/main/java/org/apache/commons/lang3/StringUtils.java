@@ -28,6 +28,9 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 import org.checkerframework.common.value.qual.EnsuresMinLenIf;
+import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.index.qual.IndexFor;
+import org.checkerframework.checker.index.qual.IndexOrHigh;
 
 /**
  * <p>Operations on {@link java.lang.String} that are
@@ -211,9 +214,10 @@ public class StringUtils {
      * @return {@code true} if the CharSequence is empty or null
      * @since 3.0 Changed signature from isEmpty(String) to isEmpty(CharSequence)
      */
+    @SuppressWarnings("contracts.conditional.postcondition.not.satisfied") // #1: if false, then cs is @MinLen(1)
     @EnsuresMinLenIf(expression = "#1", result = false, targetValue = 1)
     public static boolean isEmpty(final CharSequence cs) {
-        return cs == null || cs.length() == 0;
+        return cs == null || cs.length() == 0; // #1
     }
 
     /**
@@ -809,24 +813,28 @@ public class StringUtils {
      * @param stripChars  the characters to remove, null treated as whitespace
      * @return the stripped String, {@code null} if null String input
      */
+    @SuppressWarnings("index:argument.type.incompatible") /*
+    #1: str != null and str.length != 0 as checked by #0.1
+    #2: start++ occurs only till a maximum of strLen as checked by start != strLen
+    */
     public static String stripStart(final String str, final String stripChars) {
         int strLen;
-        if (str == null || (strLen = str.length()) == 0) {
+        if (str == null || (strLen = str.length()) == 0) { // #0.1
             return str;
         }
         int start = 0;
         if (stripChars == null) {
-            while (start != strLen && Character.isWhitespace(str.charAt(start))) {
+            while (start != strLen && Character.isWhitespace(str.charAt(start))) { // #1
                 start++;
             }
         } else if (stripChars.isEmpty()) {
             return str;
         } else {
-            while (start != strLen && stripChars.indexOf(str.charAt(start)) != INDEX_NOT_FOUND) {
+            while (start != strLen && stripChars.indexOf(str.charAt(start)) != INDEX_NOT_FOUND) { // #1
                 start++;
             }
         }
-        return str.substring(start);
+        return str.substring(start); // #2
     }
 
     /**
@@ -2158,6 +2166,7 @@ public class StringUtils {
      * @since 2.4
      * @since 3.0 Changed signature from containsAny(String, char[]) to containsAny(CharSequence, char...)
      */
+    @SuppressWarnings("index:array.access.unsafe.high") // #1: j != searchLast => j + 1 is @IndexFor("searchChars")
     public static boolean containsAny(final CharSequence cs, final char... searchChars) {
         if (isEmpty(cs) || ArrayUtils.isEmpty(searchChars)) {
             return false;
@@ -2175,7 +2184,7 @@ public class StringUtils {
                             // missing low surrogate, fine, like String.indexOf(String)
                             return true;
                         }
-                        if (i < csLast && searchChars[j + 1] == cs.charAt(i + 1)) {
+                        if (i < csLast && searchChars[j + 1] == cs.charAt(i + 1)) { // #1
                             return true;
                         }
                     } else {
@@ -2454,6 +2463,7 @@ public class StringUtils {
      * @since 2.0
      * @since 3.0 Changed signature from containsNone(String, char[]) to containsNone(CharSequence, char...)
      */
+    @SuppressWarnings("index:array.access.unsafe.high") // #1: j != searchLast => j + 1 is @IndexFor("searchChars")
     public static boolean containsNone(final CharSequence cs, final char... searchChars) {
         if (cs == null || searchChars == null) {
             return true;
@@ -2471,7 +2481,7 @@ public class StringUtils {
                             // missing low surrogate, fine, like String.indexOf(String)
                             return false;
                         }
-                        if (i < csLast && searchChars[j + 1] == cs.charAt(i + 1)) {
+                        if (i < csLast && searchChars[j + 1] == cs.charAt(i + 1)) { // #1
                             return false;
                         }
                     } else {
@@ -2694,6 +2704,7 @@ public class StringUtils {
      * @return substring from start position to end position,
      *  {@code null} if null String input
      */
+    @SuppressWarnings("index:argument.type.incompatible") // #1: start and end are valid arguments as ensured by the previous if statements
     public static String substring(final String str, int start, int end) {
         if (str == null) {
             return null;
@@ -2724,7 +2735,7 @@ public class StringUtils {
             end = 0;
         }
 
-        return str.substring(start, end);
+        return str.substring(start, end); // #1
     }
 
     // Left/Right/Mid
@@ -2820,6 +2831,7 @@ public class StringUtils {
      * @param len  the length of the required String
      * @return the middle characters, {@code null} if null String input
      */
+    @SuppressWarnings("index:argument.type.incompatible") // #1: pos is checked to be @IndexOrHigh("str") by the previous if statements
     public static String mid(final String str, int pos, final int len) {
         if (str == null) {
             return null;
@@ -2831,12 +2843,12 @@ public class StringUtils {
             pos = 0;
         }
         if (str.length() <= pos + len) {
-            return str.substring(pos);
+            return str.substring(pos); // #1
         }
         return str.substring(pos, pos + len);
     }
 
-    private static StringBuilder newStringBuilder(final int noOfItems) {
+    private static StringBuilder newStringBuilder(final @NonNegative int noOfItems) {
         return new StringBuilder(noOfItems * 16);
     }
 
@@ -3383,6 +3395,7 @@ public class StringUtils {
      * @return an array of parsed Strings, {@code null} if null String input
      * @since 2.4
      */
+    @SuppressWarnings("index:argument.type.incompatible") // #1: beg is end + separatorLength, i.e., index of start of separator + length of separator which is @LTEqLengthOf("str")
     private static String[] splitByWholeSeparatorWorker(
             final String str, final String separator, final int max, final boolean preserveAllTokens) {
         if (str == null) {
@@ -3432,7 +3445,7 @@ public class StringUtils {
                         numberOfSubstrings += 1;
                         if (numberOfSubstrings == max) {
                             end = len;
-                            substrings.add(str.substring(beg));
+                            substrings.add(str.substring(beg)); // #1
                         } else {
                             substrings.add(EMPTY);
                         }
@@ -3441,7 +3454,7 @@ public class StringUtils {
                 }
             } else {
                 // String.substring( beg ) goes from 'beg' to the end of the String.
-                substrings.add(str.substring(beg));
+                substrings.add(str.substring(beg)); // #1
                 end = len;
             }
         }
@@ -3526,6 +3539,7 @@ public class StringUtils {
      * separators are treated as one separator.
      * @return an array of parsed Strings, {@code null} if null String input
      */
+    @SuppressWarnings("index:argument.type.incompatible") // #1: i and start can get only till len, as they can be incremented only a maximum once in an iteration
     private static String[] splitWorker(final String str, final char separatorChar, final boolean preserveAllTokens) {
         // Performance tuned for 2.0 (JDK1.4)
 
@@ -3543,7 +3557,7 @@ public class StringUtils {
         while (i < len) {
             if (str.charAt(i) == separatorChar) {
                 if (match || preserveAllTokens) {
-                    list.add(str.substring(start, i));
+                    list.add(str.substring(start, i)); // #1
                     match = false;
                     lastMatch = true;
                 }
@@ -3555,7 +3569,7 @@ public class StringUtils {
             i++;
         }
         if (match || preserveAllTokens && lastMatch) {
-            list.add(str.substring(start, i));
+            list.add(str.substring(start, i)); // #1
         }
         return list.toArray(new String[list.size()]);
     }
@@ -3651,6 +3665,10 @@ public class StringUtils {
      * separators are treated as one separator.
      * @return an array of parsed Strings, {@code null} if null String input
      */
+    @SuppressWarnings("index:argument.type.incompatible") /*
+    #1: start can get only till maximum len, as it can be incremented only a maximum once in an iteration
+    #2: i and start can exitthe previous loop only with a maximum value of len
+    */
     private static String[] splitWorker(final String str, final String separatorChars, final int max, final boolean preserveAllTokens) {
         // Performance tuned for 2.0 (JDK1.4)
         // Direct code is quicker than StringTokenizer.
@@ -3678,7 +3696,7 @@ public class StringUtils {
                             i = len;
                             lastMatch = false;
                         }
-                        list.add(str.substring(start, i));
+                        list.add(str.substring(start, i)); // #1
                         match = false;
                     }
                     start = ++i;
@@ -3699,7 +3717,7 @@ public class StringUtils {
                             i = len;
                             lastMatch = false;
                         }
-                        list.add(str.substring(start, i));
+                        list.add(str.substring(start, i)); // #1
                         match = false;
                     }
                     start = ++i;
@@ -3719,7 +3737,7 @@ public class StringUtils {
                             i = len;
                             lastMatch = false;
                         }
-                        list.add(str.substring(start, i));
+                        list.add(str.substring(start, i)); // #1
                         match = false;
                     }
                     start = ++i;
@@ -3731,7 +3749,7 @@ public class StringUtils {
             }
         }
         if (match || preserveAllTokens && lastMatch) {
-            list.add(str.substring(start, i));
+            list.add(str.substring(start, i)); // #2
         }
         return list.toArray(new String[list.size()]);
     }
@@ -3801,6 +3819,14 @@ public class StringUtils {
      * @return an array of parsed Strings, {@code null} if null String input
      * @since 2.4
      */
+    @SuppressWarnings("index:argument.type.incompatible") /*
+    #1: tokenStart can only be maximum of pos - 1 as in #0.1 in the prev iteration or pos - 2 due to #0.2 in the prev iteration and pos < c.length is checked
+        newTokenStart is pos - 1 as assigned and tokenStart <= newTokenStart as explained above
+    #2: tokenStart is valid as explained in #1
+        tokenStart < pos as explained in #1
+    #3: tokenStart is valid as explained in #1
+        Since tokenStart < pos, tokenStart < c.length
+    */
     private static String[] splitByCharacterType(final String str, final boolean camelCase) {
         if (str == null) {
             return null;
@@ -3820,16 +3846,16 @@ public class StringUtils {
             if (camelCase && type == Character.LOWERCASE_LETTER && currentType == Character.UPPERCASE_LETTER) {
                 final int newTokenStart = pos - 1;
                 if (newTokenStart != tokenStart) {
-                    list.add(new String(c, tokenStart, newTokenStart - tokenStart));
-                    tokenStart = newTokenStart;
+                    list.add(new String(c, tokenStart, newTokenStart - tokenStart)); // #1
+                    tokenStart = newTokenStart; // #0.2
                 }
             } else {
-                list.add(new String(c, tokenStart, pos - tokenStart));
-                tokenStart = pos;
+                list.add(new String(c, tokenStart, pos - tokenStart)); // #2
+                tokenStart = pos; // #0.1
             }
             currentType = type;
         }
-        list.add(new String(c, tokenStart, c.length - tokenStart));
+        list.add(new String(c, tokenStart, c.length - tokenStart)); // #3
         return list.toArray(new String[list.size()]);
     }
 
@@ -4142,7 +4168,7 @@ public class StringUtils {
      * @return the joined String, {@code null} if null array input
      * @since 2.0
      */
-    public static String join(final Object[] array, final char separator, final int startIndex, final int endIndex) {
+    public static String join(final Object[] array, final char separator, final @IndexOrHigh("#1") int startIndex, final @IndexOrHigh("#1") int endIndex) {
         if (array == null) {
             return null;
         }
@@ -4193,7 +4219,7 @@ public class StringUtils {
      * @return the joined String, {@code null} if null array input
      * @since 3.2
      */
-    public static String join(final long[] array, final char separator, final int startIndex, final int endIndex) {
+    public static String join(final long[] array, final char separator, final @IndexOrHigh("#1") int startIndex, final @IndexOrHigh("#1") int endIndex) {
         if (array == null) {
             return null;
         }
@@ -4242,7 +4268,7 @@ public class StringUtils {
      * @return the joined String, {@code null} if null array input
      * @since 3.2
      */
-    public static String join(final int[] array, final char separator, final int startIndex, final int endIndex) {
+    public static String join(final int[] array, final char separator, final @IndexOrHigh("#1") int startIndex, final @IndexOrHigh("#1") int endIndex) {
         if (array == null) {
             return null;
         }
@@ -4291,7 +4317,7 @@ public class StringUtils {
      * @return the joined String, {@code null} if null array input
      * @since 3.2
      */
-    public static String join(final byte[] array, final char separator, final int startIndex, final int endIndex) {
+    public static String join(final byte[] array, final char separator, final @IndexOrHigh("#1") int startIndex, final @IndexOrHigh("#1") int endIndex) {
         if (array == null) {
             return null;
         }
@@ -4340,7 +4366,7 @@ public class StringUtils {
      * @return the joined String, {@code null} if null array input
      * @since 3.2
      */
-    public static String join(final short[] array, final char separator, final int startIndex, final int endIndex) {
+    public static String join(final short[] array, final char separator, final @IndexOrHigh("#1") int startIndex, final @IndexOrHigh("#1") int endIndex) {
         if (array == null) {
             return null;
         }
@@ -4389,7 +4415,7 @@ public class StringUtils {
      * @return the joined String, {@code null} if null array input
      * @since 3.2
      */
-    public static String join(final char[] array, final char separator, final int startIndex, final int endIndex) {
+    public static String join(final char[] array, final char separator, final @IndexOrHigh("#1") int startIndex, final @IndexOrHigh("#1") int endIndex) {
         if (array == null) {
             return null;
         }
@@ -4438,7 +4464,7 @@ public class StringUtils {
      * @return the joined String, {@code null} if null array input
      * @since 3.2
      */
-    public static String join(final double[] array, final char separator, final int startIndex, final int endIndex) {
+    public static String join(final double[] array, final char separator, final @IndexOrHigh("#1") int startIndex, final @IndexOrHigh("#1") int endIndex) {
         if (array == null) {
             return null;
         }
@@ -4487,7 +4513,7 @@ public class StringUtils {
      * @return the joined String, {@code null} if null array input
      * @since 3.2
      */
-    public static String join(final float[] array, final char separator, final int startIndex, final int endIndex) {
+    public static String join(final float[] array, final char separator, final @IndexOrHigh("#1") int startIndex, final @IndexOrHigh("#1") int endIndex) {
         if (array == null) {
             return null;
         }
@@ -4571,7 +4597,7 @@ public class StringUtils {
      * {@code endIndex < 0} or <br>
      * {@code endIndex > array.length()}
      */
-    public static String join(final Object[] array, String separator, final int startIndex, final int endIndex) {
+    public static String join(final Object[] array, String separator, final @IndexOrHigh("#1") int startIndex, final @IndexOrHigh("#1") int endIndex) {
         if (array == null) {
             return null;
         }
@@ -4865,6 +4891,10 @@ public class StringUtils {
      * @param str  the String to delete whitespace from, may be null
      * @return the String without whitespaces, {@code null} if null String input
      */
+    @SuppressWarnings({"index:array.access.unsafe.high","index:argument.type.incompatible"}) /*
+    #1: count can be only incremented from 0 till a maximum of sz as it can be incremented only once per loop, also, since it is post-increment, in chs[index++], a maximum sz - 1 will be used as the index
+    #2: count can be only a maximum of sz by #1
+    */
     public static String deleteWhitespace(final String str) {
         if (isEmpty(str)) {
             return str;
@@ -4874,13 +4904,13 @@ public class StringUtils {
         int count = 0;
         for (int i = 0; i < sz; i++) {
             if (!Character.isWhitespace(str.charAt(i))) {
-                chs[count++] = str.charAt(i);
+                chs[count++] = str.charAt(i); // #1
             }
         }
         if (count == sz) {
             return str;
         }
-        return new String(chs, 0, count);
+        return new String(chs, 0, count); // #2
     }
 
     // Remove
@@ -4909,12 +4939,13 @@ public class StringUtils {
      *  {@code null} if null String input
      * @since 2.1
      */
+    @SuppressWarnings("index:argument.type.incompatible") // #1: str.startsWith(remove) => remove.length() <= str.length
     public static String removeStart(final String str, final String remove) {
         if (isEmpty(str) || isEmpty(remove)) {
             return str;
         }
         if (str.startsWith(remove)) {
-            return str.substring(remove.length());
+            return str.substring(remove.length()); // #1
         }
         return str;
     }
@@ -4944,6 +4975,7 @@ public class StringUtils {
      *  {@code null} if null String input
      * @since 2.4
      */
+    @SuppressWarnings("index:argument.type.incompatible") // #1: str.startsWithIgnoreCase(str, remove) => remove.length() <= str.length
     public static String removeStartIgnoreCase(final String str, final String remove) {
         if (isEmpty(str) || isEmpty(remove)) {
             return str;
@@ -4978,6 +5010,7 @@ public class StringUtils {
      *  {@code null} if null String input
      * @since 2.1
      */
+    @SuppressWarnings("index:argument.type.incompatible") // #1: str.endsWith(remove) => remove.length() <= str.length, hence str.length() - remove.length() is @NonNegative and @LTEqLengthOf("str")
     public static String removeEnd(final String str, final String remove) {
         if (isEmpty(str) || isEmpty(remove)) {
             return str;
@@ -5014,6 +5047,7 @@ public class StringUtils {
      *  {@code null} if null String input
      * @since 2.4
      */
+    @SuppressWarnings("index:argument.type.incompatible") // #1: str.endsWithIgnoreCase(str, remove) => remove.length() <= str.length, hence str.length() - remove.length() is @NonNegative and @LTEqLengthOf("str")
     public static String removeEndIgnoreCase(final String str, final String remove) {
         if (isEmpty(str) || isEmpty(remove)) {
             return str;
@@ -5113,6 +5147,10 @@ public class StringUtils {
      *  {@code null} if null String input
      * @since 2.1
      */
+    @SuppressWarnings({"index:array.access.unsafe.high","index:argument.type.incompatible"}) /*
+    #1: pos can be incremented till a maximum of chars.length times, but when used as the index, it can be a maximum chars.length - 1 as it is post increment
+    #2: pos can reach only a maximum of chars.length as it is incremented maximum once in one iteration
+    */
     public static String remove(final String str, final char remove) {
         if (isEmpty(str) || str.indexOf(remove) == INDEX_NOT_FOUND) {
             return str;
@@ -5121,10 +5159,10 @@ public class StringUtils {
         int pos = 0;
         for (int i = 0; i < chars.length; i++) {
             if (chars[i] != remove) {
-                chars[pos++] = chars[i];
+                chars[pos++] = chars[i]; // #1
             }
         }
-        return new String(chars, 0, pos);
+        return new String(chars, 0, pos); // #2
     }
 
     /**
@@ -5593,6 +5631,10 @@ public class StringUtils {
      * @return the text with any replacements processed,
      *  {@code null} if null String input
      */
+    @SuppressWarnings("index:argument.type.incompatible") /*
+    #1: start = end + replLength, i.e., index where the string starts + string's length which is @LTEqLengthOf("text") and end != -1 is checked
+    #2: start = end + replLength in which end != -1 and start is @LTEqLengthOf("text") as explained in #1
+    */
      private static String replace(final String text, String searchString, final String replacement, int max, final boolean ignoreCase) {
          if (isEmpty(text) || isEmpty(searchString) || replacement == null || max == 0) {
              return text;
@@ -5613,14 +5655,14 @@ public class StringUtils {
          increase *= max < 0 ? 16 : max > 64 ? 64 : max;
          final StringBuilder buf = new StringBuilder(text.length() + increase);
          while (end != INDEX_NOT_FOUND) {
-             buf.append(text, start, end).append(replacement);
+             buf.append(text, start, end).append(replacement); // #1
              start = end + replLength;
              if (--max == 0) {
                  break;
              }
              end = searchText.indexOf(searchString, start);
          }
-         buf.append(text, start, text.length());
+         buf.append(text, start, text.length()); // #2
          return buf.toString();
      }
 
