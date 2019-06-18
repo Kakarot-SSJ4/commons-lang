@@ -382,18 +382,22 @@ public class ClassUtils {
      * @param className  the className to get the package name for, may be {@code null}
      * @return the package name or an empty string
      */
+    @SuppressWarnings("index:argument.type.incompatible") /*
+    #1, #2: !StringUtils.isEmpty(classname) => @MinLen(1), also according to the documentation, the name cannot end with '[', hence the subtring also has @MinLen(1)
+    #3, #4: className after the previous loop has @MinLen(1) as explained in #1, #2
+    */
     public static String getPackageName(String className) {
         if (StringUtils.isEmpty(className)) {
             return StringUtils.EMPTY;
         }
 
         // Strip array encoding
-        while (className.charAt(0) == '[') {
-            className = className.substring(1);
+        while (className.charAt(0) == '[') { // #1
+            className = className.substring(1); // #2
         }
         // Strip Object type encoding
-        if (className.charAt(0) == 'L' && className.charAt(className.length() - 1) == ';') {
-            className = className.substring(1);
+        if (className.charAt(0) == 'L' && className.charAt(className.length() - 1) == ';') { // #3
+            className = className.substring(1); // #4
         }
 
         final int i = className.lastIndexOf(PACKAGE_SEPARATOR_CHAR);

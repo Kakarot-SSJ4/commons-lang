@@ -5841,6 +5841,12 @@ public class StringUtils {
      *             and/or size 0)
      * @since 2.4
      */
+    @SuppressWarnings({"index:array.access.unsafe.high","index:argument.type.incompatible","index:array.access.unsafe.low"}) /*
+    #1: searchLength = replacementLength is checked in #0.1
+    #2: textIndex != -1 and is an index searched for in the string, hence a valid index
+    #3: textIndex != -1 => replaceIndex != -1
+    #4: searchLength = replacementLeng as checked in #0.1
+    */
     private static String replaceEach(
             final String text, final String[] searchList, final String[] replacementList, final boolean repeat, final int timeToLive) {
 
@@ -5862,7 +5868,7 @@ public class StringUtils {
         final int replacementLength = replacementList.length;
 
         // make sure lengths are ok, these need to be equal
-        if (searchLength != replacementLength) {
+        if (searchLength != replacementLength) { // #0.1
             throw new IllegalArgumentException("Search and Replace array lengths don't match: "
                 + searchLength
                 + " vs "
@@ -5910,10 +5916,10 @@ public class StringUtils {
 
         // count the replacement text elements that are larger than their corresponding text being replaced
         for (int i = 0; i < searchList.length; i++) {
-            if (searchList[i] == null || replacementList[i] == null) {
+            if (searchList[i] == null || replacementList[i] == null) { // #1
                 continue;
             }
-            final int greater = replacementList[i].length() - searchList[i].length();
+            final int greater = replacementList[i].length() - searchList[i].length(); // #1
             if (greater > 0) {
                 increase += 3 * greater; // assume 3 matches
             }
@@ -5926,11 +5932,11 @@ public class StringUtils {
         while (textIndex != -1) {
 
             for (int i = start; i < textIndex; i++) {
-                buf.append(text.charAt(i));
+                buf.append(text.charAt(i)); // #2
             }
-            buf.append(replacementList[replaceIndex]);
+            buf.append(replacementList[replaceIndex]); // #3
 
-            start = textIndex + searchList[replaceIndex].length();
+            start = textIndex + searchList[replaceIndex].length(); // #4
 
             textIndex = -1;
             replaceIndex = -1;
@@ -6234,6 +6240,7 @@ public class StringUtils {
      * @param str  the String to chop last character from, may be null
      * @return String without last character, {@code null} if null String input
      */
+    @SuppressWarnings("index:argument.type.incompatible") // #1: ret has length lastIdx, so lastIdx - 1 is @LTLengthOf("ret")
     public static String chop(final String str) {
         if (str == null) {
             return null;
@@ -6245,8 +6252,8 @@ public class StringUtils {
         final int lastIdx = strLen - 1;
         final String ret = str.substring(0, lastIdx);
         final char last = str.charAt(lastIdx);
-        if (last == CharUtils.LF && ret.charAt(lastIdx - 1) == CharUtils.CR) {
-            return ret.substring(0, lastIdx - 1);
+        if (last == CharUtils.LF && ret.charAt(lastIdx - 1) == CharUtils.CR) { // #1
+            return ret.substring(0, lastIdx - 1); // #1
         }
         return ret;
     }
@@ -6274,6 +6281,11 @@ public class StringUtils {
      * @return a new String consisting of the original String repeated,
      *  {@code null} if null String input
      */
+    @SuppressWarnings({"index:argument.type.incompatible","index:array.access.unsafe.high.range"}) /*
+    #1: str.length() is checked to be 1
+    #2: str.length() is 2
+    #3: output2 has a length repeat*2 and i goes from repeat*2 - 2 to 0, hence i + 1 can attain a maximum value repeat*2 - 1
+    */
     public static String repeat(final String str, final int repeat) {
         // Performance tuned for 2.0 (JDK1.4)
 
@@ -6288,20 +6300,20 @@ public class StringUtils {
             return str;
         }
         if (inputLength == 1 && repeat <= PAD_LIMIT) {
-            return repeat(str.charAt(0), repeat);
+            return repeat(str.charAt(0), repeat); // #1
         }
 
         final int outputLength = inputLength * repeat;
         switch (inputLength) {
             case 1 :
-                return repeat(str.charAt(0), repeat);
+                return repeat(str.charAt(0), repeat); // #1
             case 2 :
-                final char ch0 = str.charAt(0);
-                final char ch1 = str.charAt(1);
+                final char ch0 = str.charAt(0); // #2
+                final char ch1 = str.charAt(1); // #2
                 final char[] output2 = new char[outputLength];
                 for (int i = repeat * 2 - 2; i >= 0; i--, i--) {
-                    output2[i] = ch0;
-                    output2[i + 1] = ch1;
+                    output2[i] = ch0; // #3
+                    output2[i + 1] = ch1; // #3
                 }
                 return new String(output2);
             default :
@@ -6845,13 +6857,18 @@ public class StringUtils {
      * @see #uncapitalize(String)
      * @since 2.0
      */
+    @SuppressWarnings({"index:argument.type.incompatible","array.access.unsafe.high.range"}) /*
+    #1: str != NULL && str.length() != 0 as ensured by the previous if
+    #2: inOffset is incremented either by 1 or by 2 due to the property of Character.charCount() till strLen = newCodePoints.length, hence outOffset when used as the index(as it is post-increment) is @LTLengthOf("newCodePoint")
+    #3: outOffset can be a maximum strLen here as it can only reach strLen - 1 in #2 and it undergoes post-increment
+    */
     public static String capitalize(final String str) {
         int strLen;
         if (str == null || (strLen = str.length()) == 0) {
             return str;
         }
 
-        final int firstCodepoint = str.codePointAt(0);
+        final int firstCodepoint = str.codePointAt(0); // #1
         final int newCodePoint = Character.toTitleCase(firstCodepoint);
         if (firstCodepoint == newCodePoint) {
             // already capitalized
@@ -6863,10 +6880,10 @@ public class StringUtils {
         newCodePoints[outOffset++] = newCodePoint; // copy the first codepoint
         for (int inOffset = Character.charCount(firstCodepoint); inOffset < strLen; ) {
             final int codepoint = str.codePointAt(inOffset);
-            newCodePoints[outOffset++] = codepoint; // copy the remaining ones
+            newCodePoints[outOffset++] = codepoint; /* #2 */ // copy the remaining ones
             inOffset += Character.charCount(codepoint);
          }
-        return new String(newCodePoints, 0, outOffset);
+        return new String(newCodePoints, 0, outOffset); // #3
     }
 
     /**
@@ -6890,13 +6907,18 @@ public class StringUtils {
      * @see #capitalize(String)
      * @since 2.0
      */
+    @SuppressWarnings({"index:argument.type.incompatible","array.access.unsafe.high.range"}) /*
+    #1: str != NULL && str.length() != 0 as ensured by the previous if
+    #2: inOffset is incremented either by 1 or by 2 due to the property of Character.charCount() till strLen = newCodePoints.length, hence outOffset when used as the index(as it is post-increment) is @LTLengthOf("newCodePoint")
+    #3: outOffset can be a maximum strLen here as it can only reach strLen - 1 in #2 and it undergoes post-increment
+    */
     public static String uncapitalize(final String str) {
         int strLen;
         if (str == null || (strLen = str.length()) == 0) {
             return str;
         }
 
-        final int firstCodepoint = str.codePointAt(0);
+        final int firstCodepoint = str.codePointAt(0); // #1
         final int newCodePoint = Character.toLowerCase(firstCodepoint);
         if (firstCodepoint == newCodePoint) {
             // already capitalized
@@ -6908,10 +6930,10 @@ public class StringUtils {
         newCodePoints[outOffset++] = newCodePoint; // copy the first codepoint
         for (int inOffset = Character.charCount(firstCodepoint); inOffset < strLen; ) {
             final int codepoint = str.codePointAt(inOffset);
-            newCodePoints[outOffset++] = codepoint; // copy the remaining ones
+            newCodePoints[outOffset++] = codepoint; /* #2 */ // copy the remaining ones
             inOffset += Character.charCount(codepoint);
          }
-        return new String(newCodePoints, 0, outOffset);
+        return new String(newCodePoints, 0, outOffset); // #3
     }
 
     /**
@@ -6941,6 +6963,10 @@ public class StringUtils {
      * @param str  the String to swap case, may be null
      * @return the changed String, {@code null} if null String input
      */
+    @SuppressWarnings({"index:argument.type.incompatible","array.access.unsafe.high.range"}) /*
+    #1: outOffset can reach a maximum strLen getting incremented in the loop, as Character.charCount() returns either 1 or 2, but as it is post-increment, only till strLen - 1 is used as the index
+    #2: outOffset can be a maximum strLen as explained in #1
+    */
     public static String swapCase(final String str) {
         if (isEmpty(str)) {
             return str;
@@ -6961,10 +6987,10 @@ public class StringUtils {
             } else {
                 newCodePoint = oldCodepoint;
             }
-            newCodePoints[outOffset++] = newCodePoint;
+            newCodePoints[outOffset++] = newCodePoint; // #1
             i += Character.charCount(newCodePoint);
          }
-        return new String(newCodePoints, 0, outOffset);
+        return new String(newCodePoints, 0, outOffset); // #2
     }
 
     // Count matches
@@ -6989,7 +7015,7 @@ public class StringUtils {
      * @return the number of occurrences, 0 if either CharSequence is {@code null}
      * @since 3.0 Changed signature from countMatches(String, String) to countMatches(CharSequence, CharSequence)
      */
-    public static int countMatches(final CharSequence str, final CharSequence sub) {
+    public static @NonNegative int countMatches(final CharSequence str, final CharSequence sub) {
         if (isEmpty(str) || isEmpty(sub)) {
             return 0;
         }
@@ -7021,7 +7047,7 @@ public class StringUtils {
      * @return the number of occurrences, 0 if the CharSequence is {@code null}
      * @since 3.4
      */
-    public static int countMatches(final CharSequence str, final char ch) {
+    public static @NonNegative int countMatches(final CharSequence str, final char ch) {
         if (isEmpty(str)) {
             return 0;
         }
