@@ -788,94 +788,100 @@ public class EqualsBuilderTest {
         assertTrue(new EqualsBuilder().append(obj1, obj2).isEquals());
     }
 
+    @SuppressWarnings({"index:array.access.unsafe.high","index:array.access.unsafe.high.constant"}) // #1: array1 and array2 have 2 rows and 2 columns each as defined in #0.1
     @Test
     public void testMultiLongArray() {
-        final long[][] array1 = new long[2][2];
-        final long[][] array2 = new long[2][2];
+        final long[][] array1 = new long[2][2]; // #0.1
+        final long[][] array2 = new long[2][2]; // #0.1
         for (int i = 0; i < array1.length; ++i) {
             for (int j = 0; j < array1[0].length; j++) {
-                array1[i][j] = (i + 1) * (j + 1);
-                array2[i][j] = (i + 1) * (j + 1);
+                array1[i][j] = (i + 1) * (j + 1); // #1
+                array2[i][j] = (i + 1) * (j + 1); // #1
             }
         }
         assertTrue(new EqualsBuilder().append(array1, array1).isEquals());
         assertTrue(new EqualsBuilder().append(array1, array2).isEquals());
-        array1[1][1] = 0;
+        array1[1][1] = 0; // #1
         assertFalse(new EqualsBuilder().append(array1, array2).isEquals());
     }
 
+    @SuppressWarnings({"index:array.access.unsafe.high","index:array.access.unsafe.high.constant"}) // #1: array1 and array2 have 2 rows and 2 columns each as defined in #0.1
     @Test
     public void testMultiIntArray() {
-        final int[][] array1 = new int[2][2];
-        final int[][] array2 = new int[2][2];
+        final int[][] array1 = new int[2][2]; // #0.1
+        final int[][] array2 = new int[2][2]; // #0.1
         for (int i = 0; i < array1.length; ++i) {
             for (int j = 0; j < array1[0].length; j++) {
-                array1[i][j] = (i + 1) * (j + 1);
-                array2[i][j] = (i + 1) * (j + 1);
+                array1[i][j] = (i + 1) * (j + 1); // #1
+                array2[i][j] = (i + 1) * (j + 1); // #1
             }
         }
         assertTrue(new EqualsBuilder().append(array1, array1).isEquals());
         assertTrue(new EqualsBuilder().append(array1, array2).isEquals());
-        array1[1][1] = 0;
+        array1[1][1] = 0; // #1
         assertFalse(new EqualsBuilder().append(array1, array2).isEquals());
     }
 
+    @SuppressWarnings({"index:array.access.unsafe.high","index:array.access.unsafe.high.constant"}) // #1: array1 and array2 have 2 rows and 2 columns each as defined in #0.1
     @Test
     public void testMultiShortArray() {
-        final short[][] array1 = new short[2][2];
-        final short[][] array2 = new short[2][2];
+        final short[][] array1 = new short[2][2]; // #0.1
+        final short[][] array2 = new short[2][2]; // #0.1
         for (short i = 0; i < array1.length; ++i) {
             for (short j = 0; j < array1[0].length; j++) {
-                array1[i][j] = i;
-                array2[i][j] = i;
+                array1[i][j] = i; // #1
+                array2[i][j] = i; // #1
             }
         }
         assertTrue(new EqualsBuilder().append(array1, array1).isEquals());
         assertTrue(new EqualsBuilder().append(array1, array2).isEquals());
-        array1[1][1] = 0;
+        array1[1][1] = 0; // #1
         assertFalse(new EqualsBuilder().append(array1, array2).isEquals());
     }
 
+    @SuppressWarnings({"index:array.access.unsafe.high","index:array.access.unsafe.high.constant"}) // #1: array1 and array2 have 2 rows and 2 columns each as defined in #0.1
     @Test
     public void testMultiCharArray() {
-        final char[][] array1 = new char[2][2];
-        final char[][] array2 = new char[2][2];
+        final char[][] array1 = new char[2][2]; // #0.1
+        final char[][] array2 = new char[2][2]; // #0.1
         for (char i = 0; i < array1.length; ++i) {
             for (char j = 0; j < array1[0].length; j++) {
-                array1[i][j] = i;
-                array2[i][j] = i;
+                array1[i][j] = i; // #1
+                array2[i][j] = i; // #1
             }
         }
         assertTrue(new EqualsBuilder().append(array1, array1).isEquals());
         assertTrue(new EqualsBuilder().append(array1, array2).isEquals());
-        array1[1][1] = 0;
+        array1[1][1] = 0; // #1
         assertFalse(new EqualsBuilder().append(array1, array2).isEquals());
     }
 
+    @SuppressWarnings({"index:array.access.unsafe.high","index:array.access.unsafe.high.constant"}) // #1: array1 and array2 have 2 rows and 2 columns each as defined in #0.1
     @Test
     public void testMultiByteArray() {
-        final byte[][] array1 = new byte[2][2];
-        final byte[][] array2 = new byte[2][2];
+        final byte[][] array1 = new byte[2][2]; // #0.1
+        final byte[][] array2 = new byte[2][2]; // #0.1
         for (byte i = 0; i < array1.length; ++i) {
             for (byte j = 0; j < array1[0].length; j++) {
-                array1[i][j] = i;
+                array1[i][j] = i; // #1
                 array2[i][j] = i;
             }
         }
         assertTrue(new EqualsBuilder().append(array1, array1).isEquals());
         assertTrue(new EqualsBuilder().append(array1, array2).isEquals());
-        array1[1][1] = 0;
+        array1[1][1] = 0; // #1
         assertFalse(new EqualsBuilder().append(array1, array2).isEquals());
     }
 
+    @SuppressWarnings({"index:array.access.unsafe.high","index:array.access.unsafe.high.constant"}) // #1: array1 and array2 have 2 rows and 2 columns each as defined in #0.1
     @Test
     public void testMultiFloatArray() {
-        final float[][] array1 = new float[2][2];
-        final float[][] array2 = new float[2][2];
+        final float[][] array1 = new float[2][2]; // #0.1
+        final float[][] array2 = new float[2][2]; // #0.1
         for (int i = 0; i < array1.length; ++i) {
             for (int j = 0; j < array1[0].length; j++) {
-                array1[i][j] = (i + 1) * (j + 1);
-                array2[i][j] = (i + 1) * (j + 1);
+                array1[i][j] = (i + 1) * (j + 1); // #1
+                array2[i][j] = (i + 1) * (j + 1); // #1
             }
         }
         assertTrue(new EqualsBuilder().append(array1, array1).isEquals());
@@ -884,35 +890,37 @@ public class EqualsBuilderTest {
         assertFalse(new EqualsBuilder().append(array1, array2).isEquals());
     }
 
+    @SuppressWarnings({"index:array.access.unsafe.high","index:array.access.unsafe.high.constant"}) // #1: array1 and array2 have 2 rows and 2 columns each as defined in #0.1
     @Test
     public void testMultiDoubleArray() {
-        final double[][] array1 = new double[2][2];
-        final double[][] array2 = new double[2][2];
+        final double[][] array1 = new double[2][2]; // #0.1
+        final double[][] array2 = new double[2][2]; // #0.1
         for (int i = 0; i < array1.length; ++i) {
             for (int j = 0; j < array1[0].length; j++) {
-                array1[i][j] = (i + 1) * (j + 1);
-                array2[i][j] = (i + 1) * (j + 1);
+                array1[i][j] = (i + 1) * (j + 1); // #1
+                array2[i][j] = (i + 1) * (j + 1); // #1
             }
         }
         assertTrue(new EqualsBuilder().append(array1, array1).isEquals());
         assertTrue(new EqualsBuilder().append(array1, array2).isEquals());
-        array1[1][1] = 0;
+        array1[1][1] = 0; // #1
         assertFalse(new EqualsBuilder().append(array1, array2).isEquals());
     }
 
+    @SuppressWarnings({"index:array.access.unsafe.high","index:array.access.unsafe.high.constant"}) // #1: array1 and array2 have 2 rows and 2 columns each as defined in #0.1
     @Test
     public void testMultiBooleanArray() {
-        final boolean[][] array1 = new boolean[2][2];
-        final boolean[][] array2 = new boolean[2][2];
+        final boolean[][] array1 = new boolean[2][2]; // #0.1
+        final boolean[][] array2 = new boolean[2][2]; // #0.1
         for (int i = 0; i < array1.length; ++i) {
             for (int j = 0; j < array1[0].length; j++) {
-                array1[i][j] = i == 1 || j == 1;
-                array2[i][j] = i == 1 || j == 1;
+                array1[i][j] = i == 1 || j == 1; // #1
+                array2[i][j] = i == 1 || j == 1; // #1
             }
         }
         assertTrue(new EqualsBuilder().append(array1, array1).isEquals());
         assertTrue(new EqualsBuilder().append(array1, array2).isEquals());
-        array1[1][1] = false;
+        array1[1][1] = false; // #1
         assertFalse(new EqualsBuilder().append(array1, array2).isEquals());
 
         // compare 1 dim to 2.
@@ -923,39 +931,41 @@ public class EqualsBuilderTest {
         assertFalse(new EqualsBuilder().append(array3, array2).isEquals());
     }
 
+    @SuppressWarnings({"index:array.access.unsafe.high","index:array.access.unsafe.high.constant"}) // #1: array1 has 2 rows, hence array1.length is 2,hence by the loop #0.1, both arrays have 2 columns, also, aray1[i].length = array2[i].length = 2
     @Test
     public void testRaggedArray() {
         final long array1[][] = new long[2][];
         final long array2[][] = new long[2][];
-        for (int i = 0; i < array1.length; ++i) {
+        for (int i = 0; i < array1.length; ++i) { // #0.1
             array1[i] = new long[2];
             array2[i] = new long[2];
             for (int j = 0; j < array1[i].length; ++j) {
                 array1[i][j] = (i + 1) * (j + 1);
-                array2[i][j] = (i + 1) * (j + 1);
+                array2[i][j] = (i + 1) * (j + 1); // #1
             }
         }
         assertTrue(new EqualsBuilder().append(array1, array1).isEquals());
         assertTrue(new EqualsBuilder().append(array1, array2).isEquals());
-        array1[1][1] = 0;
+        array1[1][1] = 0; // #1
         assertFalse(new EqualsBuilder().append(array1, array2).isEquals());
     }
 
+    @SuppressWarnings({"index:array.access.unsafe.high","index:array.access.unsafe.high.constant"}) // #1: array1 and array2 have 2 rows each (by #0.1) and 2 columns each(by #0.2)
     @Test
     public void testMixedArray() {
-        final Object array1[] = new Object[2];
-        final Object array2[] = new Object[2];
+        final Object array1[] = new Object[2]; // #0.1
+        final Object array2[] = new Object[2]; // #0.1
         for (int i = 0; i < array1.length; ++i) {
-            array1[i] = new long[2];
-            array2[i] = new long[2];
+            array1[i] = new long[2]; // #0.2
+            array2[i] = new long[2]; // #0.2
             for (int j = 0; j < 2; ++j) {
-                ((long[]) array1[i])[j] = (i + 1) * (j + 1);
-                ((long[]) array2[i])[j] = (i + 1) * (j + 1);
+                ((long[]) array1[i])[j] = (i + 1) * (j + 1); // #1
+                ((long[]) array2[i])[j] = (i + 1) * (j + 1); // #1
             }
         }
         assertTrue(new EqualsBuilder().append(array1, array1).isEquals());
         assertTrue(new EqualsBuilder().append(array1, array2).isEquals());
-        ((long[]) array1[1])[1] = 0;
+        ((long[]) array1[1])[1] = 0; // #1
         assertFalse(new EqualsBuilder().append(array1, array2).isEquals());
     }
 
